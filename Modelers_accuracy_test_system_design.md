@@ -240,6 +240,37 @@
 
 ## 组件架构
 
+- 基线管理
+
+```mermaid
+graph TD;
+    subgraph Frontend
+        A[merlin-website]
+    end
+
+    subgraph Backend
+        C[ci-adapter-server]
+    end
+
+    subgraph Infrastructure
+        I[Database]
+        H[OBS]
+    end
+
+    A -->|上传/查看/删除基线| C
+    C -->|存储/读取基线元数据| I
+    C -->|上传/下载基线文件| H
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px;
+    style C fill:#bbf,stroke:#333,stroke-width:2px;
+    style I fill:#bfb,stroke:#333,stroke-width:2px;
+    style H fill:#bfb,stroke:#333,stroke-width:2px;
+```
+
+
+
+- 精度测试
+
 ```mermaid
 graph TD;
     subgraph Frontend
@@ -255,27 +286,24 @@ graph TD;
     subgraph Infrastructure
         F[Kafka]
         I[Database]
-        G[Persistent Volume]
         H[OBS]
         E[K8S Cluster]
     end
 
     A -->|发起测试请求| B
     B -->|发送Kafka消息| F
-    B -->|创建/读取基线信息| G
-    B -->|数据库交互| I
+    B -->|更新前端状态| A
+
+    C -->|存储/读取结果元数据| I
+    C -->|上传/下载结果文件| H
+    C -->|通知状态变更| B
+
     F -->|消费消息| C
     C -->|调用API创建Job| D
     D -->|与K8S交互| E
-    E -->|挂载PV| G
     E -->|启动Job| J[训练/推理容器]
-    J -->|下载模型和数据集| K[openmind-hub]
-    J -->|执行训练/推理| L[llamafactory-cli]
-    J -->|存储/读取基线文件| G
+    J -->|执行训练/推理| L[openmind-cli]
     J -->|上传日志| H
-    C -->|查询Job状态| D
-    C -->|通知状态变更| B
-    B -->|更新前端状态| A
 
     style A fill:#f9f,stroke:#333,stroke-width:2px;
     style B fill:#bbf,stroke:#333,stroke-width:2px;
@@ -283,13 +311,13 @@ graph TD;
     style D fill:#bbf,stroke:#333,stroke-width:2px;
     style E fill:#bfb,stroke:#333,stroke-width:2px;
     style F fill:#bfb,stroke:#333,stroke-width:2px;
-    style G fill:#bfb,stroke:#333,stroke-width:2px;
     style H fill:#bfb,stroke:#333,stroke-width:2px;
     style I fill:#bfb,stroke:#333,stroke-width:2px;
     style J fill:#ff9,stroke:#333,stroke-width:2px;
-    style K fill:#ff9,stroke:#333,stroke-width:2px;
     style L fill:#ff9,stroke:#333,stroke-width:2px;
 ```
+
+
 
 
 
@@ -491,7 +519,7 @@ graph TD;
 
 ### 基线管理与数据供给
 
-模型详情页新增基线管理界面，用户能够进行基线的查看、新增、删除。后端`merlin-server` 需要管理基线的生命周期，并将模型不同类型（推理/测试）的基线数据文件保存到PV中。`flexcompute-server`拉起测试Job时需要进行对应PV挂载，并通过`subpath`机制将对应的基线文件挂载到测试Job的指定目录下，供精度对比测试使用。
+​	模型详情页新增基线管理界面，用户能够进行基线的查看、新增、删除。后端`ci-adapter-server` 需要管理基线的生命周期，并将模型不同类型（推理/测试）的基线数据文件保存到对象存储（OBS）中。`flexcompute-server`拉起测试Job时需要进行对应对象路径环境变量挂载，供精度对比测试容器获取基线数据。
 
 
 
@@ -1067,7 +1095,7 @@ sequenceDiagram
 
 ### 测试结果详情存储与回显
 
-​	社区前端需要显示精度测试的详情（测试历史的表单中用户点击呈现），因此在Job容器执行测试任务之后，将训练输出产物、对比结果产物存储对象存储的特定路径下，测试流程结束后由`ci-adapter-sver`管理对应对象存储路径下的产物并进行数据提取，为前端的结果详情显示提供数据源。
+​	社区前端需要显示精度测试的详情（测试历史的表单中用户点击呈现），因此在Job容器执行测试任务之后，将训练输出产物、对比结果产物存储对象存储的特定路径下，测试流程结束后由`ci-adapter-server`管理对应对象存储路径下的产物并进行数据提取，为前端的结果详情显示提供数据源。
 
 
 
