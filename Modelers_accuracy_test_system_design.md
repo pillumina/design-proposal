@@ -553,16 +553,17 @@ graph TD;
 
 ##### 查询基线接口
 
-- Endpoint: GET /v1/model/{owner}/{name}/baselines
+>- 分页参数需要更多说明
+>- 缺少按创建时间等字段排序
 
+- Endpoint: GET /v1/model/{owner}/{name}/baselines
 - 参数:
 
   - type: 基线类型（可选，inference 或 training）
-
-  - page: 页码（可选，默认值为 1）
-
-  - size: 每页大小（可选，默认值为 10）
-
+  - page_num: 页码（可选，默认值为 1）
+  - page_size: 每页大小（可选，1~20，默认值为 10）
+  - sort: 排序字段（可选，created_at | name，默认created_at）
+  - order: 排序方向（可选，asc|desc，默认desc）
 - 逻辑:
 
   1. 验证用户权限，确保用户有权限查看该模型的基线信息。
@@ -570,10 +571,8 @@ graph TD;
   2. 从 PostgreSQL 数据库中查询指定模型（由 owner 和 name 标识）的所有基线信息。
 
   3. 支持按基线类型过滤，并支持分页返回结果。
-
 - 对于推理基线，返回基线名、创建时间、输入文本、输出文本文件名以及下载链接、Metric、阈值。
 - 对于训练基线，返回基线名、创建时间、数据集、loss 文件名以及下载链接。
-
 - 返回:
 
   - 成功: 返回 200 状态码和基线列表
@@ -584,20 +583,24 @@ graph TD;
 // 成功响应示例
 {
   "total": 2,
-  "page": 1,
-  "size": 10,
+  "page_num": 1,
+  "page_size": 10,
   "baselines": [
     {
       "id": "baseline_123",
       "name": "baseline_name_1",
       "type": "inference",
-      "input_file": {
-        "name": "input.txt",
-        "download_url": "https://your-obs-service.com/path/to/input.txt"
-      },
-      "output_file": {
-        "name": "output.txt",
-        "download_url": "https://your-obs-service.com/path/to/output.txt"
+      "files": {
+        "input": {
+          "name": "input.txt",
+          "size": 1024,
+          "download_url": "https://your-obs-service.com/path/to/input.txt"
+      	},
+      	"output": {
+          "name": "output.txt",
+          "size": 1024,
+          "download_url": "https://your-obs-service.com/path/to/output.txt"
+      	},
       },
       "metric": "BLEU",
       "threshold": 0.75,
@@ -610,9 +613,12 @@ graph TD;
       "name": "baseline_name_2",
       "type": "training",
       "dataset": "AI_Connect/alpaca-gpt4-data",
-      "loss_file": {
-        "name": "loss.jsonl",
-        "download_url": "https://your-obs-service.com/path/to/loss.jsonl"
+      "files": {
+        "loss_file": {
+          "name": "loss.jsonl",
+          "size": 1024,
+          "download_url": "https://your-obs-service.com/path/to/loss.jsonl"
+        },        
       },
       "owner": "user_789",
       "model_name": "example_model",
@@ -709,21 +715,36 @@ flowchart TD
 ##### 创建基线
 
 - Endpoint: POST /v1/model/{owner}/{name}/baselines
+
 - 参数：
-  - name: 基线名称
+  - name: 基线名称  ``[a-zA-Z0-9_-]{1,32}``
   - type: 基线类型（inference 或 training）
-  - input_file: 输入文件（仅推理）
-  - output_file: 输出文件（仅推理）
-  - loss_file: Loss 文件（仅训练）
-  - dataset_id: 关联数据集（仅训练）
-  - threshold: 阈值
-  - operator: 操作符（如 >=）
+  
+  - files:
+  
+    - input_file: 输入文件（仅推理）
+  
+    - output_file: 输出文件（仅推理）
+  
+    - loss_file: Loss 文件（仅训练）
+  
+  - metadata:
+  
+    - dataset_id: 关联数据集（仅训练）
+    - metric: 指标 （仅推理）
+  
+    - threshold: 阈值 （仅推理）
+  
+    - operator: 操作符（如 >=）（仅推理）
+  
 - 逻辑：
   1. **验证用户权限**: 确保用户是模型的 `owner` 或有编辑权限。
-  2. **文件上传**: 将文件上传到 OBS，并获取文件路径。
-  3. **数据库记录**: 在 PostgreSQL 数据库中创建基线记录，包含文件路径和其他元数据。
+  2. **文件格式/大小预校验**：内容预校验
+  3. **文件上传**: 将文件上传到 OBS，并获取文件路径。
+  4. **数据库记录**: 在 PostgreSQL 数据库中创建基线记录，包含文件路径和其他元数据。
+  
 - 返回：
-  - **成功**: 返回 201 状态码和基线信息
+  - **成功**: 返回 200 状态码和基线信息
   - **失败**: 返回错误信息和相应的状态码
 
 ```json
@@ -731,8 +752,20 @@ flowchart TD
 {
   "id": "baseline_123",
   "name": "baseline_name",
-  "type": "inference",
-  "obs_path": "obs://bucket/path/to/file",
+  "type": "inference | training",
+  "files": {
+    "input": {
+      "name": "input.txt",
+      "size": 1024，
+      "download_path": "obs://bucket/path/to/file",
+    },
+    "output": {
+      // ...
+    },
+    "loss": {
+      // ..
+    }
+  }, 
   "owner": "user_789",
   "model_name": "example_model",
   "created_at": "2023-10-31T12:00:00Z"
@@ -776,7 +809,7 @@ flowchart TD
    ```json
         {
           "error": "Bad Request",
-          "message": "Unsupported file format or failed to read file."
+          "message": "Unsupported file format or failed to validate file."
         }
    ```
 
@@ -868,6 +901,8 @@ flowchart TD
 
 ##### 删除基线
 
+>- 没有软删除机制
+
 - Endpoint: DELETE /v1/model/{owner}/{name}/baselines/{baseline_id}
 
 - 逻辑：
@@ -875,7 +910,7 @@ flowchart TD
   2. **删除 OBS 文件**: 删除 OBS 中的相关文件。
   3. **删除数据库记录**: 从 PostgreSQL 数据库中删除基线记录。
 - 返回：
-  -  **成功**: 返回 204 状态码
+  -  **成功**: 返回 200状态码
   -  **失败**: 返回错误信息和相应的状态码
 
 - 错误处理：
@@ -893,7 +928,20 @@ flowchart TD
         }
    ```
 
-2. 权限校验：
+2. 依赖检查：
+
+   - 错误：基线正在被测试服务使用。
+   - 响应：返回409（Conflict）错误码和错误信息。
+   - 示例：
+
+   ```json
+        {
+          "error": "Bad Request",
+          "message": "Baseline in used by test"
+        }
+   ```
+
+3. 权限校验：
 
    - 错误: 用户无权访问删除指定的模型基线。
    - 响应: 返回 401 状态码和错误信息。
@@ -906,7 +954,7 @@ flowchart TD
         }
    ```
 
-3. OBS删除异常:
+4. OBS删除异常:
 
    - 错误: 删除 OBS 中的文件失败。
    - 响应: 返回 500 状态码和错误信息。
@@ -921,7 +969,7 @@ flowchart TD
 
    
 
-4. 数据库删除：
+5. 数据库删除：
 
    - 错误: 数据库删除失败。
    - 响应: 返回 500 状态码和错误信息。
@@ -1975,6 +2023,32 @@ sequenceDiagram
 
 
 ## 附录
+
+### `API`错误码
+
+400 Bad Request:
+
+- INVALID_BASELINE_NAME: 基线名称不符合规则
+- INVALID_FILE_FORMAT: 文件格式不正确
+- FILE_TOO_LARGE: 文件超过大小限制(2MB)
+- DUPLICATE_BASELINE_NAME: 基线名称重复
+
+403 Forbidden:
+
+- PERMISSION_DENIED: 无权限操作
+
+404 Not Found:
+
+- BASELINE_NOT_FOUND: 基线不存在
+
+409 Conflict:
+
+- BASELINE_IN_USE: 基线正在被测试任务使用
+
+500 Internal Error:
+
+- STORAGE_ERROR: 存储服务异常 
+- INTERNAL_SERVER_ERROR: 内部服务异常
 
 ### `API Swagger`定义
 
