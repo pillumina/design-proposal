@@ -1279,12 +1279,15 @@ sequenceDiagram
   -  `owner`: 模型所有者（路径参数）
   -  `name`: 模型名称（路径参数）
   - `limit`: 限制返回的测试结果数量（可选，默认值为 3）
+  - `type`：测试类型（accuracy | availability）
+  - `workflow_type`：流程类型（inference | training）
+  - `sort`：排序类型（created_at）
+  - `order`：排序顺序（asc | desc，默认desc）
 
 - **返回**：
-
-  - 成功: 返回 200 状态码和历史详情列表
-
-  - 失败: 返回错误信息和相应的状态码
+- 成功: 返回 200 状态码和历史详情列表
+  
+- 失败: 返回错误信息和相应的状态码
 
 ```json
 {
@@ -1294,7 +1297,8 @@ sequenceDiagram
       "id": 1,
       "baseline_id": "baseline_123",
       "is_comparison_test": true,
-      "test_type": "inference",
+      "workflow_type": "inference",
+      "type": "accuracy",
       "stage": "test",
       "output": "output.txt",
       "log": "execution.log",
@@ -1359,13 +1363,11 @@ flowchart TD
 ##### 查询测试详情接口
 
 - **Endpoint**: GET /v1/model/{owner}/{name}/test-results/{result_id}/details
-
 - **参数**：
 
   -  `owner`: 模型所有者（路径参数）
   -  `name`: 模型名称（路径参数）
-  - `result_id`: 测试id
-
+  - `result_id`: 测试id（路径参数）
 - **返回**：
 
   - 成功: 返回 200 状态码和测试详情
@@ -1375,10 +1377,12 @@ flowchart TD
 ```json
 {
   "baseline_id": "baseline_123",
-  "test_type": "inference",
-  "input_content": "This is the input text content.",
-  "output_content": "This is the output text content.",
-  "loss_content": null, // or actual loss content for training
+  "result_id": 1，
+  "type": "accuracy"，
+  "workflow_type": "inference",
+  "input_content": "This is the input text content.", // 仅推理
+  "output_content": "This is the output text content.", // 仅推理
+  "loss_content": null, // or actual loss content for training // 仅训练
   "metric": "BLEU",
   "metric_value": 0.85,
   "threshold": 0.80,
