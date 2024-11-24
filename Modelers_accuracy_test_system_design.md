@@ -556,7 +556,7 @@ graph TD;
 >- 分页参数需要更多说明
 >- 缺少按创建时间等字段排序
 
-- Endpoint: GET /v1/model/{owner}/{name}/baselines
+- Endpoint: GET /v1/model/{model-id}/baselines
 - 参数:
 
   - type: 基线类型（可选，inference 或 training）
@@ -714,7 +714,7 @@ flowchart TD
 
 ##### 创建基线
 
-- Endpoint: POST /v1/model/{owner}/{name}/baselines
+- Endpoint: POST /v1/model/{model-id}/baselines
 
 - 参数：
   - name: 基线名称  ``[a-zA-Z0-9_-]{1,32}``
@@ -903,7 +903,7 @@ flowchart TD
 
 >- 没有软删除机制
 
-- Endpoint: DELETE /v1/model/{owner}/{name}/baselines/{baseline_id}
+- Endpoint: DELETE /v1/model/{model-id}/baselines/{baseline_id}
 
 - 逻辑：
   1. **验证用户权限**: 确保用户有权限删除该基线。
@@ -1270,14 +1270,15 @@ sequenceDiagram
 
 #### API设计
 
-##### 查询测试历史结果接口
+##### 查询测试全部结果接口
 
-- **Endpoint**: `GET /v1/model/{owner}/{name}/test-results`
+- **Endpoint**: `GET /v1/model/{model-id}/test-results`
 
 - **参数**：
-
+  - `model-id`: 模型id (路径参数)
   -  `owner`: 模型所有者（路径参数）
   -  `name`: 模型名称（路径参数）
+  -  `test-id`：测试任务id （Query参数）
   - `limit`: 限制返回的测试结果数量（可选，默认值为 3）
   - `type`：测试类型（accuracy | availability）
   - `workflow_type`：流程类型（inference | training）
@@ -1362,11 +1363,11 @@ flowchart TD
 
 ##### 查询测试详情接口
 
-- **Endpoint**: GET /v1/model/{owner}/{name}/test-results/{result_id}/details
+- **Endpoint**: GET /v1/model/{model-id}/test-results/{result_id}
 - **参数**：
-
-  -  `owner`: 模型所有者（路径参数）
-  -  `name`: 模型名称（路径参数）
+  - `model-id`: 模型id (路径参数)
+  -  `owner`: 模型所有者
+  -  `name`: 模型名称
   - `result_id`: 测试id（路径参数）
 - **返回**：
 
