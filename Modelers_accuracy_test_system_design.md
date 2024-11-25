@@ -700,24 +700,14 @@ flowchart TD
 
 - 参数：
   - name: 基线名称  ``[a-zA-Z0-9_-]{1,32}``
-  - type: 基线类型（inference 或 training）
-  
-  - files:
-  
-    - input_file: 输入文件（仅推理）
-  
-    - output_file: 输出文件（仅推理）
-  
-    - loss_file: Loss 文件（仅训练）
-  
-  - metadata:
-  
-    - dataset_id: 关联数据集（仅训练）
-    - metric: 指标 （仅推理）
-  
-    - threshold: 阈值 （仅推理）
-  
-    - operator: 操作符（如 >=）（仅推理）
+  - workflow_type: 基线类型（inference 或 training）
+  - dataset_id: 关联数据集（仅训练）({owner/dataset格式string})
+  - metric: 指标 （仅推理）
+  - threshold: 阈值 （仅推理)
+  - operator: 操作符（如 >=）（仅推理）
+  - input_file: 输入文件内容（FormFile）（仅推理）
+  - output_file: 输出文件内容（FormFile）（仅推理）
+  - loss_file: loss文件内容（FormFile）（仅训练）
   
 - 逻辑：
   1. **验证用户权限**: 确保用户是模型的 `owner` 或有编辑权限。
