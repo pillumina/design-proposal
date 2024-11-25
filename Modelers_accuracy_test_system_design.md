@@ -585,45 +585,27 @@ graph TD;
   "total": 2,
   "page_num": 1,
   "page_size": 10,
+  "total_pages": 1,
+  "has_next": false,
+  "has_previous": false,
   "baselines": [
     {
-      "id": "baseline_123",
+      "id": 10,
+      "model-id": 123
       "name": "baseline_name_1",
-      "type": "inference",
-      "files": {
-        "input": {
-          "name": "input.txt",
-          "size": 1024,
-          "download_url": "https://your-obs-service.com/path/to/input.txt"
-      	},
-      	"output": {
-          "name": "output.txt",
-          "size": 1024,
-          "download_url": "https://your-obs-service.com/path/to/output.txt"
-      	},
-      },
+      "workflow_type": "inference",
+      "test_type": "accuracy",
+      "input_file_name": "input.txt",
+      "input_file_path": "baselines/123/accuracy/inference/10/input.txt",
+      "input_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/inference/10/input.txt",
+      "output_file_name": "output.txt",
+      "output_file_path": "baselines/123/accuracy/inference/10/output.txt",
+      "output_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/inference/10/output.txt",
       "metric": "BLEU",
       "threshold": 0.75,
       "owner": "user_789",
-      "model_name": "example_model",
       "created_at": "2023-10-31T12:00:00Z"
     },
-    {
-      "id": "baseline_124",
-      "name": "baseline_name_2",
-      "type": "training",
-      "dataset": "AI_Connect/alpaca-gpt4-data",
-      "files": {
-        "loss_file": {
-          "name": "loss.jsonl",
-          "size": 1024,
-          "download_url": "https://your-obs-service.com/path/to/loss.jsonl"
-        },        
-      },
-      "owner": "user_789",
-      "model_name": "example_model",
-      "created_at": "2023-10-31T12:05:00Z"
-    }
   ]
 }
 ```
@@ -750,22 +732,20 @@ flowchart TD
 ```json
 // 成功响应示例
 {
-  "id": "baseline_123",
+  "id": 10,
   "name": "baseline_name",
-  "type": "inference | training",
-  "files": {
-    "input": {
-      "name": "input.txt",
-      "size": 1024，
-      "download_path": "obs://bucket/path/to/file",
-    },
-    "output": {
-      // ...
-    },
-    "loss": {
-      // ..
-    }
-  }, 
+  "model-id": 123,
+  "test_type": "accuracy",
+  "workflow_type": "inference | training",
+  "input_file_name": "input.txt",
+  "input_file_path": "baselines/123/accuracy/inference/10/input.txt",
+  "input_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/inference/10/input.txt",
+  "output_file_name": "output.txt",
+  "output_file_path": "baselines/123/accuracy/inference/10/output.txt",
+  "output_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/inference/10/output.txt",
+  "metric": "BLEU",
+  "threshold": 0.9,
+  "operator": ">=",
   "owner": "user_789",
   "model_name": "example_model",
   "created_at": "2023-10-31T12:00:00Z"
@@ -1294,13 +1274,17 @@ sequenceDiagram
   "results": [
     {
       "id": 1,
-      "baseline_id": "baseline_123",
+      "test_id": 10,
+      "model-id": 50,
+      "baseline_id": 11,
+      "baseline_name": "baseline_123",
       "is_comparison_test": true,
       "workflow_type": "inference",
-      "type": "accuracy",
+      "test_type": "accuracy",
       "stage": "test",
-      "output": "output.txt",
-      "log": "execution.log",
+      "output_file_url": "https://xxx/xxx/output.txt",
+      "log_file_url": "https://xxx/xxx/execution.log",
+      "compared_output_file_url": "https://xxx/xxx/output0.txt",
       "passed": true,
       "metric": "BLEU",
       "metric_value": 0.85,
