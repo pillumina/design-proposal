@@ -559,9 +559,9 @@ graph TD;
 - Endpoint: GET /v1/model/{model-id}/baselines
 - 参数:
 
-  - type: 基线类型（可选，inference 或 training）
+  - workflow_type: 基线类型（可选，inference 或 training）
   - page_num: 页码（可选，默认值为 1）
-  - page_size: 每页大小（可选，1~20，默认值为 10）
+  - page_size: 每页大小（可选，默认值为 10）
   - sort: 排序字段（可选，created_at | name，默认created_at）
   - order: 排序方向（可选，asc|desc，默认desc）
 - 逻辑:
@@ -1272,18 +1272,16 @@ sequenceDiagram
 
 ##### 查询测试全部结果接口
 
-- **Endpoint**: `GET /v1/model/{model-id}/test-results`
+- **Endpoint**: `GET /v1/model/{model-id}/test-results?test-id=1`
 
 - **参数**：
   - `model-id`: 模型id (路径参数)
-  -  `owner`: 模型所有者（路径参数）
-  -  `name`: 模型名称（路径参数）
   -  `test-id`：测试任务id （Query参数）
   - `limit`: 限制返回的测试结果数量（可选，默认值为 3）
   - `type`：测试类型（accuracy | availability）
   - `workflow_type`：流程类型（inference | training）
-  - `sort`：排序类型（created_at）
-  - `order`：排序顺序（asc | desc，默认desc）
+  - `sort`：排序类型（created_at, 可选）
+  - `order`：排序顺序（asc | desc，默认desc， 可选）
 
 - **返回**：
 - 成功: 返回 200 状态码和历史详情列表
