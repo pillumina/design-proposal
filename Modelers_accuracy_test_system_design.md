@@ -601,11 +601,30 @@ graph TD;
       "output_file_name": "output.txt",
       "output_file_path": "baselines/123/accuracy/inference/10/output.txt",
       "output_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/inference/10/output.txt",
+      "loss_file_name": "loss.jsonl",
+      "loss_file_path": "baselines/123/accuracy/training/10/loss.jsonl",
+      "loss_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/training/10/loss.jsonl"
+      "dataset": "AI_Connect/alpaca-gpt4-data"
       "metric": "BLEU",
       "threshold": 0.75,
       "owner": "user_789",
       "created_at": "2023-10-31T12:00:00Z"
     },
+    {
+      "id": 11,
+      "model-id": 123
+      "name": "baseline_name_2",
+      "workflow_type": "training",
+      "test_type": "accuracy",
+      "loss_file_name": "loss.jsonl",
+      "loss_file_path": "baselines/123/accuracy/training/10/loss.jsonl",
+      "loss_file_url": "https://openmind-ci.xxxxxxxx/baselines/123/accuracy/training/10/loss.jsonl"
+      "dataset": "AI_Connect/alpaca-gpt4-data"
+      "metric": "Relative Error",
+      "threshold": 0.02,
+      "owner": "user_789",
+      "created_at": "2023-10-31T13:00:00Z"
+     },
   ]
 }
 ```
