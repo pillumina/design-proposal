@@ -1250,6 +1250,8 @@ sequenceDiagram
   - `limit`: 限制返回的测试结果数量（可选，默认值为 3）
   - `type`：测试类型（accuracy | availability）
   - `workflow_type`：流程类型（inference | training）
+  - `page_num`: 页码（可选，默认值为 1）
+  - `page_size`: 每页大小（可选，默认值为 10）
   - `sort`：排序类型（created_at, 可选）
   - `order`：排序顺序（asc | desc，默认desc， 可选）
 
